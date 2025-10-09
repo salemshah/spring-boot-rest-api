@@ -53,11 +53,25 @@ public class UserService {
     public User updateUser(Long id, User updatedUser) {
         User existingUser = fetchUserById(id);
 
+        // ✅ 1. Check if email is changing
+        String newEmail = updatedUser.getEmail();
+        if (newEmail != null && !newEmail.equalsIgnoreCase(existingUser.getEmail())) {
+            // ✅ 2. Check if the new email already belongs to another user
+            boolean emailExists = userRepository.existsByEmail(newEmail);
+            if (emailExists) {
+                throw new InvalidUserDataException("Email already in use");
+            }
+
+            existingUser.setEmail(newEmail);
+        }
+
+        // ✅ 3. Update other fields
         existingUser.setFirstName(updatedUser.getFirstName());
         existingUser.setLastName(updatedUser.getLastName());
-        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setPhon(updatedUser.getPhon());
         existingUser.setUserRole(UserRole.CUSTOMER);
 
+        // ✅ 4. Save safely
         try {
             return userRepository.save(existingUser);
         } catch (DataAccessException ex) {

@@ -5,11 +5,13 @@ import com.ecommerce.ecommerce.dto.UserRequestDTO;
 import com.ecommerce.ecommerce.dto.UserResponseDTO;
 import com.ecommerce.ecommerce.entity.User;
 import com.ecommerce.ecommerce.mapper.UserMapper;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Tag(name = "User")
 public class UserController {
 
     private final UserService userService;

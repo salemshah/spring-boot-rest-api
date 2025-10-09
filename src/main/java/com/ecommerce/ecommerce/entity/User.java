@@ -3,6 +3,11 @@ package com.ecommerce.ecommerce.entity;
 import com.ecommerce.ecommerce.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -31,4 +36,13 @@ public class User {
 
     @Column(unique = true, nullable = false)
     private String email;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAddress> addresses;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
