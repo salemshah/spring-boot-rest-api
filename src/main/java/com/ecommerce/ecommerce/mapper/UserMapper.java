@@ -1,7 +1,9 @@
 package com.ecommerce.ecommerce.mapper;
+
 import com.ecommerce.ecommerce.dto.UserRequestDTO;
 import com.ecommerce.ecommerce.dto.UserResponseDTO;
 import com.ecommerce.ecommerce.entity.User;
+import com.ecommerce.ecommerce.enums.UserRole;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,6 +16,8 @@ public class UserMapper {
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .email(dto.getEmail())
+                .phon(dto.getPhon())
+                .userRole(UserRole.CUSTOMER)
                 .build();
     }
 
@@ -24,7 +28,9 @@ public class UserMapper {
         dto.setId(user.getId());
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
+        dto.setPhon(user.getPhon());
         dto.setEmail(user.getEmail());
+        dto.setUserRole(user.getUserRole());
         return dto;
     }
 }

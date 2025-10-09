@@ -1,5 +1,6 @@
 package com.ecommerce.ecommerce.entity;
 
+import com.ecommerce.ecommerce.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +21,13 @@ public class User {
 
     @Column(nullable = false)
     private String lastName;
+
+    @Column(nullable = false)
+    private String phon;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole userRole = UserRole.CUSTOMER;
 
     @Column(unique = true, nullable = false)
     private String email;

@@ -1,5 +1,6 @@
 package com.ecommerce.ecommerce.service;
 
+import com.ecommerce.ecommerce.enums.UserRole;
 import com.ecommerce.ecommerce.repository.UserRepository;
 import com.ecommerce.ecommerce.entity.User;
 import com.ecommerce.ecommerce.exception.DatabaseOperationException;
@@ -40,6 +41,7 @@ public class UserService {
             throw new InvalidUserDataException("Email already in use");
         }
         try {
+            user.setUserRole(UserRole.CUSTOMER);
             return userRepository.save(user);
         } catch (DataAccessException ex) {
             log.error("Error saving user", ex);
@@ -54,6 +56,7 @@ public class UserService {
         existingUser.setFirstName(updatedUser.getFirstName());
         existingUser.setLastName(updatedUser.getLastName());
         existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setUserRole(UserRole.CUSTOMER);
 
         try {
             return userRepository.save(existingUser);
@@ -63,12 +66,13 @@ public class UserService {
         }
     }
 
-    public void deleteUser(Long id) {
+    public String deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException(id);
         }
         try {
             userRepository.deleteById(id);
+            return "User deleted successfully (ID: " + id + ")";
         } catch (DataAccessException ex) {
             log.error("Error deleting user {}", id, ex);
             throw new DatabaseOperationException("Failed to delete user", ex);

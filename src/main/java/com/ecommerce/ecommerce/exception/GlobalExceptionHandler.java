@@ -1,22 +1,25 @@
 package com.ecommerce.ecommerce.exception;
 
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handle validation errors (e.g., from @Valid)
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Validation Failed");
+        Map<String, Object> body = createBaseBody(HttpStatus.BAD_REQUEST, "Validation Failed");
 
         Map<String, String> fieldErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
@@ -27,25 +30,49 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handle specific custom exceptions for clear semantics
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
+        return buildResponse(ex, HttpStatus.NOT_FOUND);
+    }
 
+    @ExceptionHandler(InvalidUserDataException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidUserData(InvalidUserDataException ex) {
+        return buildResponse(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DatabaseOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleDatabaseError(DatabaseOperationException ex) {
+        return buildResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Handle any unexpected exception not covered above
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         return buildResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private HttpStatus getStatus(Exception ex) {
-        if (ex instanceof UserNotFoundException) return HttpStatus.NOT_FOUND;
-        if (ex instanceof InvalidUserDataException) return HttpStatus.BAD_REQUEST;
-        if (ex instanceof DatabaseOperationException) return HttpStatus.INTERNAL_SERVER_ERROR;
-        return HttpStatus.INTERNAL_SERVER_ERROR;
+    /**
+     * Build a consistent error response
+     */
+    private ResponseEntity<Map<String, Object>> buildResponse(Exception ex, HttpStatus status) {
+        Map<String, Object> body = createBaseBody(status, ex.getMessage());
+        return new ResponseEntity<>(body, status);
     }
 
-    private ResponseEntity<Map<String, Object>> buildResponse(Exception ex, HttpStatus status) {
-        Map<String, Object> body = new HashMap<>();
+    /**
+     * Create a consistent base response body
+     */
+    private Map<String, Object> createBaseBody(HttpStatus status, String message) {
+        Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());
         body.put("error", status.getReasonPhrase());
-        body.put("message", ex.getMessage());
-        return new ResponseEntity<>(body, status);
+        body.put("message", message);
+        return body;
     }
 }
