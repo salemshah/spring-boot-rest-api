@@ -5,7 +5,7 @@ import com.ecommerce.ecommerce.repository.UserRepository;
 import com.ecommerce.ecommerce.entity.User;
 import com.ecommerce.ecommerce.exception.DatabaseOperationException;
 import com.ecommerce.ecommerce.exception.InvalidUserDataException;
-import com.ecommerce.ecommerce.exception.UserNotFoundException;
+import com.ecommerce.ecommerce.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -32,7 +32,7 @@ public class UserService {
 
     public User fetchUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+                .orElseThrow(() -> new EntityNotFoundException("User", userId));
     }
 
     @Transactional
@@ -53,10 +53,10 @@ public class UserService {
     public User updateUser(Long id, User updatedUser) {
         User existingUser = fetchUserById(id);
 
-        // ✅ 1. Check if email is changing
+        //1. Check if email is changing
         String newEmail = updatedUser.getEmail();
         if (newEmail != null && !newEmail.equalsIgnoreCase(existingUser.getEmail())) {
-            // ✅ 2. Check if the new email already belongs to another user
+            // 2. Check if the new email already belongs to another user
             boolean emailExists = userRepository.existsByEmail(newEmail);
             if (emailExists) {
                 throw new InvalidUserDataException("Email already in use");
@@ -65,13 +65,13 @@ public class UserService {
             existingUser.setEmail(newEmail);
         }
 
-        // ✅ 3. Update other fields
+        // 3. Update other fields
         existingUser.setFirstName(updatedUser.getFirstName());
         existingUser.setLastName(updatedUser.getLastName());
         existingUser.setPhon(updatedUser.getPhon());
         existingUser.setUserRole(UserRole.CUSTOMER);
 
-        // ✅ 4. Save safely
+        // 4. Save safely
         try {
             return userRepository.save(existingUser);
         } catch (DataAccessException ex) {
@@ -82,7 +82,7 @@ public class UserService {
 
     public String deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
+            throw new EntityNotFoundException("User", id);
         }
         try {
             userRepository.deleteById(id);
