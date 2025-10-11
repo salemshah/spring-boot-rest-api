@@ -4,6 +4,7 @@ import com.ecommerce.ecommerce.entity.Product;
 import com.ecommerce.ecommerce.exception.DatabaseOperationException;
 import com.ecommerce.ecommerce.exception.EntityNotFoundException;
 import com.ecommerce.ecommerce.repository.ProductRepository;
+import com.ecommerce.ecommerce.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -23,32 +24,18 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
-    public Page<Product> filterProducts(String name, String category, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        Specification<Product> spec = Specification.unrestricted();
-
-        if (name != null && !name.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("name")), "%" + name.trim().toLowerCase() + "%"));
+    public Page<Product> filterProducts(
+            String name, String category, BigDecimal minPrice, BigDecimal maxPrice, String keyword, Pageable pageable) {
+        try {
+            return productRepository.findAll(
+                    ProductSpecification.filter(name, category, minPrice, maxPrice, keyword),
+                    pageable
+            );
+        } catch (DataAccessException ex) {
+            log.error("Error filtering products", ex);
+            throw new DatabaseOperationException("Failed to fetch products", ex);
         }
-
-        if (category != null && !category.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(cb.lower(root.get("category")), category.trim().toLowerCase()));
-        }
-
-        if (minPrice != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("price"), minPrice));
-        }
-
-        if (maxPrice != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.lessThanOrEqualTo(root.get("price"), maxPrice));
-        }
-
-        return productRepository.findAll(spec, pageable);
     }
-
 
     public Product fetchProductById(Long productId) {
         return productRepository.findById(productId).

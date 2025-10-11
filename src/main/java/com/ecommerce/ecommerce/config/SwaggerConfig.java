@@ -3,7 +3,7 @@ package com.ecommerce.ecommerce.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -25,19 +25,23 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
+//                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
+                .components(new io.swagger.v3.oas.models.Components()
+                        .addSecuritySchemes("bearerAuth",
+                                new SecurityScheme()
+                                        .name("Authorization")
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")))
+
                 .info(new Info()
                         .title("Spring Boot E-Commerce API")
                         .version("v1.0")
                         .description("A Spring Boot–based RESTFul API for an e-commerce platform.")
-                        // 👇 Add author/contact info here
                         .contact(new Contact()
                                 .name("Salem Shah")
                                 .email("salemshahdev@gmail.com")
                                 .url("https://salemshah.com"))
-                        // 👇 Optional: Add license info too
-//                        .license(new License()
-//                                .name("Apache 2.0")
-//                                .url("https://www.apache.org/licenses/LICENSE-2.0.html"))
                 )
                 .servers(List.of(
                         new Server()

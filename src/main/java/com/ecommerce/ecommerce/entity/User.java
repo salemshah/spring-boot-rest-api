@@ -27,18 +27,24 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String phon;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole userRole = UserRole.CUSTOMER;
+    private UserRole userRole; //= UserRole.CUSTOMER;
 
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(nullable = false)
+    private String password;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAddress> addresses;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Cart cart;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
