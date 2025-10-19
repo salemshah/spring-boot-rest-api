@@ -1,5 +1,5 @@
 services:
-  # 🗄 PostgreSQL Database
+  # PostgreSQL Database
   db:
     image: postgres:16
     container_name: ecommerce_db
