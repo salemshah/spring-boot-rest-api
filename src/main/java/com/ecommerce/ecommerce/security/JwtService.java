@@ -68,16 +68,6 @@ public class JwtService {
                 .compact();
     }
 
-    /** Convenience overload used in refresh scenarios. */
-    public String generateJwtToken(String email) {
-        Objects.requireNonNull(email, "email must not be null");
-        return Jwts.builder()
-                .subject(email)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + (long) jwtExpirationMs))
-                .signWith(jwtKey)
-                .compact();
-    }
 
     /** Generate Refresh Token (kept your role claim). */
     public String generateJwtRefreshToken(User user) {
@@ -91,16 +81,6 @@ public class JwtService {
                 .compact();
     }
 
-    /** Extract username (subject) from Access Token. */
-    public String getUserNameFromJwtToken(String token) {
-        return Jwts.parser()
-                .clockSkewSeconds(CLOCK_SKEW_SECONDS)
-                .verifyWith(jwtKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
-    }
 
     /** Extract username (subject) from Refresh Token. */
     public String getUserNameFromJwtRefreshToken(String token) {
@@ -123,21 +103,6 @@ public class JwtService {
                 .getPayload();
     }
 
-    /** Get role claim from Access Token (null if absent). */
-    public String getRoleFromAccessToken(String token) {
-        return extractAllClaims(token).get(CLAIM_ROLE, String.class);
-    }
-
-    /** Get role claim from Refresh Token (null if absent). */
-    public String getRoleFromRefreshToken(String token) {
-        return Jwts.parser()
-                .clockSkewSeconds(CLOCK_SKEW_SECONDS)
-                .verifyWith(jwtRefreshKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .get(CLAIM_ROLE, String.class);
-    }
 
     /** Validate Access Token signature/structure/expiry. */
     public boolean validateJwtToken(String token) {

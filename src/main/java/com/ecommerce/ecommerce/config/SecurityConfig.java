@@ -42,8 +42,7 @@ public class SecurityConfig {
      */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -73,7 +72,7 @@ public class SecurityConfig {
 
                         // Public auth endpoints
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh").permitAll()
-
+                        .requestMatchers("/whoami").permitAll()
                         // Public GET products
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**").permitAll()
 
@@ -81,6 +80,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/products", "/api/products/**").hasRole("ADMIN")
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers("/actuator/**").permitAll()
 
                         // Admin area
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

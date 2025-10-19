@@ -81,7 +81,7 @@ public class UserService {
         if (principal instanceof UserDetails ud) {
             email = ud.getUsername();
         } else {
-            // In your filter you sometimes set principal to the email String
+            // In your filter you sometimes set principal to the email String // Todo: change the comment
             email = String.valueOf(principal);
         }
 

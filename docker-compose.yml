@@ -1,0 +1,54 @@
+services:
+  # 🗄 PostgreSQL Database
+  db:
+    image: postgres:16
+    container_name: ecommerce_db
+    environment:
+      POSTGRES_DB: e_commerce_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # host_port:container_port  => 5433 on PC maps to 5432 inside the container
+    restart: always
+    networks:
+      - backend
+
+  # Spring Boot Application (3 replicas for load balancing)
+  app:
+    build: .
+    environment:
+      SPRING_DATASOURCE_URL_DOCKER: jdbc:postgresql://db:5432/e_commerce_db
+      SPRING_DATASOURCE_USERNAME_DOCKER: postgres
+      SPRING_DATASOURCE_PASSWORD_DOCKER: root
+    depends_on:
+      - db
+    deploy:
+      replicas: 3
+    restart: always
+    networks:
+      - backend
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:latest
+    container_name: nginx_loadbalancer
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./too_many_requests.html:/etc/nginx/html/too_many_requests.html:ro
+    restart: always
+    networks:
+      - backend
+
+# persistent storage
+volumes:
+  db_data:
+
+# Shared network
+networks:
+  backend:
